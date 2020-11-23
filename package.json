@@ -1,0 +1,42 @@
+{
+  "name": "CubosAcademy_Backend_DesafioModulo4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabnogueira/CubosAcademy_Backend_DesafioModulo4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabnogueira/CubosAcademy_Backend_DesafioModulo4/issues"
+  },
+  "homepage": "https://github.com/gabnogueira/CubosAcademy_Backend_DesafioModulo4#readme",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "bcrypt": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^10.0.0",
+    "nodemailer": "^6.4.16",
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "install": "^0.13.0",
+    "npm": "^6.14.8",
+    "prettier": "^2.1.2"
+  }
+}
