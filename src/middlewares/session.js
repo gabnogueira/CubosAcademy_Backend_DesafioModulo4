@@ -3,7 +3,7 @@ const { response } = require('../utils/response');
 require('dotenv').config();
 
 const verificacao = async (ctx, next) => {
-	const [bearer, token] = ctx.headers.authorization.split(' ');
+	const [/** bearer, */ token] = ctx.headers.authorization.split(' ');
 
 	try {
 		const verification = await jwt.verify(token, process.env.JWT_SECRET);

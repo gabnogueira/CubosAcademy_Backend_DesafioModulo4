@@ -1,12 +1,12 @@
 const databasePrincipal = require('./database');
 
-const schema = {
+const schemasToCreateTables = {
 	1: `
 	CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		email VARCHAR(255),
 		senha VARCHAR(255),
-		nome TEXT NOT NULL,
+		name TEXT NOT NULL,
 		deletado BOOL DEFAULT FALSE
 	)
 	`,
@@ -35,4 +35,19 @@ const schema = {
 	`,
 };
 
-module.exports = { schema };
+const criarTabelas = async (num) => {
+	await databasePrincipal.query({ text: schemasToCreateTables[num] });
+
+	console.log('tabela criada');
+};
+
+const dropTable = async (nomeTabela) => {
+	if (nomeTabela) {
+		await databasePrincipal.query(`DROP TABLE ${nomeTabela}`);
+		console.log('Tabela dropada!');
+	}
+};
+
+criarTabelas(1);
+
+module.exports = { schemasToCreateTables, dropTable };

@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 const jwt = require('jsonwebtoken');
 const database = require('../repositories/biblioteca');
-const { response } = require('../utils/response');
+const response = require('../utils/response');
 const passwords = require('../utils/passwords');
 
 require('dotenv').config();
@@ -20,12 +20,16 @@ const autenticarUser = async (ctx) => {
 
 		if (comparacao) {
 			const token = jwt.sign(
-				{ email: result.email },
+				/** isso irá ser passado a frente no session e possibilitará add o id do usuario nas cobranças */
+				{ email: result.email, id: result.id, nome: result.nome },
 				process.env.JWT_SECRET || 'cubosacademy',
 				{ expiresIn: '1h' }
 			);
 
-			return response(ctx, 200, { token });
+			return response(ctx, 200, {
+				mensagem: 'Usuário logado com sucesso!',
+				token,
+			});
 		}
 
 		return response(ctx, 200, result);

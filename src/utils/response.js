@@ -7,4 +7,4 @@ const response = (ctx, code, dados) => {
 	};
 };
 
-module.exports = { response };
+module.exports = response;
