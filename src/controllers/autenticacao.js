@@ -21,7 +21,7 @@ const autenticarUser = async (ctx) => {
 		if (comparacao) {
 			const token = jwt.sign(
 				/** isso irá ser passado a frente no session e possibilitará add o id do usuario nas cobranças */
-				{ email: result.email, id: result.id, nome: result.nome },
+				{ email: result.email, id: result.id, name: result.nome },
 				process.env.JWT_SECRET || 'cubosacademy',
 				{ expiresIn: '1h' }
 			);

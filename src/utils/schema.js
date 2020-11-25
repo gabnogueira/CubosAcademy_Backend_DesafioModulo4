@@ -13,12 +13,12 @@ const schemasToCreateTables = {
 	2: `
 	CREATE TABLE IF NOT EXISTS clients (
 		id SERIAL PRIMARY KEY,
-		nome TEXT NOT NULL
+		name TEXT NOT NULL,
 		cpf VARCHAR(11),
 		email VARCHAR(255),
-		telefone VARCHAR(255)
-		deletado BOOL DEFAULT FALSE,
-		idDoUsuario INTEGER NOT NULL
+		phone VARCHAR(255),
+		deleted BOOL DEFAULT FALSE,
+		userId INTEGER NOT NULL
 	)
 	`,
 	3: `
@@ -38,7 +38,15 @@ const schemasToCreateTables = {
 const criarTabelas = async (num) => {
 	await databasePrincipal.query({ text: schemasToCreateTables[num] });
 
-	console.log('tabela criada');
+	console.log(`tabela ${num} criada`);
+};
+
+const clientCheckByCpf = (cpf) => {
+	const query = {
+		text: `SELECT cpf FROM clients WHERE cpf = $1`,
+		values: [cpf],
+	};
+	return databasePrincipal.query(query);
 };
 
 const dropTable = async (nomeTabela) => {
@@ -49,5 +57,7 @@ const dropTable = async (nomeTabela) => {
 };
 
 criarTabelas(1);
+criarTabelas(2);
+// criarTabelas(3);
 
-module.exports = { schemasToCreateTables, dropTable };
+module.exports = { schemasToCreateTables, dropTable, clientCheckByCpf };
