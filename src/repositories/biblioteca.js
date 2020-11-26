@@ -19,7 +19,7 @@ const obterUsuariosPorEmail = async (email) => {
 
 const adicionarUsuario = async (email, senha, nome) => {
 	const query = {
-		text: `INSERT INTO users (email, senha, name) VALUES ($1, $2, $3) RETURNING *`,
+		text: `INSERT INTO users (email, senha, name) VALUES ($1, $2, $3) RETURNING *;`,
 		values: [email, senha, nome],
 	};
 
@@ -36,11 +36,22 @@ const checkIfClientAlreadyExists = async (cpf) => {
 
 const queryToAddNewClient = async (name, cpf, email, tel, userId) => {
 	const query = {
-		text: `INSERT INTO clients (name, cpf, email, phone, userId) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+		text: `INSERT INTO clients (name, cpf, email, phone, userId) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
 		values: [name, cpf, email, tel, userId],
 	};
 
 	return databasePrincipal.query(query);
+};
+
+const queryToUpdateClientData = async (clientId, name, cpf, email, tel) => {
+	const query = {
+		text: `UPDATE clients SET name = $1, cpf = $2, email = $3, phone = $4 WHERE id = $5 RETURNING *;`,
+		values: [name, cpf, email, tel, clientId],
+	};
+
+	const result = await databasePrincipal.query(query);
+
+	return result.rows.shift();
 };
 
 module.exports = {
@@ -49,4 +60,5 @@ module.exports = {
 	adicionarUsuario,
 	queryToAddNewClient,
 	checkIfClientAlreadyExists,
+	queryToUpdateClientData,
 };
