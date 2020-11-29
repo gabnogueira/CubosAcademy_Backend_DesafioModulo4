@@ -2,7 +2,7 @@ const queriesParaFuncoesDeUsuarios = require('../repositories/biblioteca');
 const encriptarSenha = require('../utils/passwords');
 const response = require('../utils/response');
 
-const adicionarUsuario = async (ctx) => {
+const addNewUser = async (ctx) => {
 	const inputs = ctx.request.body;
 
 	console.log(inputs);
@@ -20,4 +20,4 @@ const adicionarUsuario = async (ctx) => {
 	return response(ctx, 200, 'Sucesso!');
 };
 
-module.exports = { adicionarUsuario };
+module.exports = { addNewUser };

@@ -6,7 +6,7 @@ const passwords = require('../utils/passwords');
 
 require('dotenv').config();
 
-const autenticarUser = async (ctx) => {
+const authUser = async (ctx) => {
 	const { email = null, senha = null } = ctx.request.body;
 
 	if (!email || !senha) {
@@ -36,4 +36,4 @@ const autenticarUser = async (ctx) => {
 	}
 };
 
-module.exports = { autenticarUser };
+module.exports = { authUser };
