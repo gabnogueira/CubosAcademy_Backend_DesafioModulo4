@@ -4,27 +4,27 @@ const response = require('../utils/response');
 
 // eslint-disable-next-line consistent-return
 const addNewClient = async (ctx) => {
-	const newClientData = ctx.request.body;
-	const formattedCpf = formatter.cpfFormatter(newClientData.cpf);
+	const newClientInfo = ctx.request.body;
+	const formattedCpf = formatter.cpfFormatter(newClientInfo.cpf);
 
 	const checkIfClientExists = await clientFunctionsQueries.checkIfClientAlreadyExists(
 		formattedCpf
 	);
 
-	if (newClientData && !checkIfClientExists) {
+	if (newClientInfo && !checkIfClientExists) {
 		const userId = ctx.state.id;
 
 		const addClientQueryResult = await clientFunctionsQueries.queryToAddNewClient(
-			newClientData.nome,
+			newClientInfo.nome,
 			formattedCpf,
-			newClientData.email,
-			newClientData.tel,
+			newClientInfo.email,
+			newClientInfo.tel,
 			userId
 		);
 
 		return response(ctx, 201, { id: addClientQueryResult.rows.shift().id });
 	}
-	if (newClientData && checkIfClientExists) {
+	if (newClientInfo && checkIfClientExists) {
 		return response(ctx, 404, { message: 'Esse CPF já foi cadastrado' });
 	}
 };
