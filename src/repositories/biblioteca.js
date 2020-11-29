@@ -54,6 +54,48 @@ const queryToUpdateClientData = async (clientId, name, cpf, email, tel) => {
 	return result.rows.shift();
 };
 
+const queryToGetClientById = async (clientId, userId) => {
+	const query = {
+		text: `SELECT * FROM clients WHERE id = $1 AND userid = $2`,
+		values: [clientId, userId],
+	};
+
+	const result = await databasePrincipal.query(query);
+
+	return result.rows.shift();
+};
+
+/** queries para funções de cobranças */
+
+const queryToCreateNewCharge = async (
+	userId,
+	clientId,
+	description,
+	amount,
+	dueDate,
+	bankslipLink,
+	bankslipBarcode,
+	pagarmeTid
+) => {
+	const query = {
+		text: `INSERT INTO CHARGES (amount, dueDate, clientId, userId, description, bankslipLink, bankslipBarcode, pagarmeTid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`,
+		values: [
+			amount,
+			dueDate,
+			clientId,
+			userId,
+			description,
+			bankslipLink,
+			bankslipBarcode,
+			pagarmeTid,
+		],
+	};
+
+	const result = await databasePrincipal.query(query);
+
+	return result.rows.shift();
+};
+
 module.exports = {
 	obterUsuariosPorEmail,
 	criarTabelas,
@@ -61,4 +103,6 @@ module.exports = {
 	queryToAddNewClient,
 	checkIfClientAlreadyExists,
 	queryToUpdateClientData,
+	queryToCreateNewCharge,
+	queryToGetClientById,
 };
