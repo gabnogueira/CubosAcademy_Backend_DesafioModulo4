@@ -1,4 +1,4 @@
-const databasePrincipal = require('./database');
+const mainDatabase = require('./database');
 
 const schemasToCreateTables = {
 	1: `
@@ -38,7 +38,7 @@ const schemasToCreateTables = {
 };
 
 const criarTabelas = async (num) => {
-	await databasePrincipal.query({ text: schemasToCreateTables[num] });
+	await mainDatabase.query({ text: schemasToCreateTables[num] });
 
 	console.log(`tabela ${num} criada`);
 };
@@ -48,12 +48,12 @@ const clientCheckByCpf = (cpf) => {
 		text: `SELECT cpf FROM clients WHERE cpf = $1`,
 		values: [cpf],
 	};
-	return databasePrincipal.query(query);
+	return mainDatabase.query(query);
 };
 
 const dropTable = async (nomeTabela) => {
 	if (nomeTabela) {
-		await databasePrincipal.query(`DROP TABLE ${nomeTabela}`);
+		await mainDatabase.query(`DROP TABLE ${nomeTabela}`);
 		console.log('Tabela dropada!');
 	}
 };
