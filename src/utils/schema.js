@@ -24,13 +24,15 @@ const schemasToCreateTables = {
 	3: `
 	CREATE TABLE IF NOT EXISTS charges (
 		id SERIAL PRIMARY KEY,
-		valor INTEGER NOT NULL,
-		vencimento DATE,
-		idDoCliente INTEGER NOT NULL,
-		descricao TEXT NOT NULL,
-		linkDoBoleto TEXT NOT NULL,
-		codigoDeBarras TEXT NOT NULL,
-		dataDePagamento DATE,
+		amount INTEGER NOT NULL,
+		dueDate DATE,
+		clientId INTEGER NOT NULL,
+		userId INTEGER NOT NULL,
+		description TEXT NOT NULL,
+		bankslipLink TEXT NOT NULL,
+		bankslipBarcode TEXT NOT NULL,
+		pagarmeTid INTEGER NOT NULL,
+		paymentDate DATE DEFAULT NULL
 	)
 	`,
 };
@@ -58,6 +60,6 @@ const dropTable = async (nomeTabela) => {
 
 criarTabelas(1);
 criarTabelas(2);
-// criarTabelas(3);
+criarTabelas(3);
 
 module.exports = { schemasToCreateTables, dropTable, clientCheckByCpf };
