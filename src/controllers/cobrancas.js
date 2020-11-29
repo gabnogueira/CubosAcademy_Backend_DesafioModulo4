@@ -36,7 +36,7 @@ const createCharges = async (ctx) => {
 			pagarmeData.tid
 		);
 
-		console.log(newCharge);
+		// console.log(newCharge);
 
 		const { duedate } = newCharge;
 		const { paymentdate } = newCharge;
@@ -63,4 +63,50 @@ const createCharges = async (ctx) => {
 	return response(ctx, 400, 'Erro. Reveja as informações de cobrança');
 };
 
-module.exports = { createCharges };
+const listCharges = async (ctx) => {
+	const { offset } = ctx.query;
+	const { cobrancasPorPagina } = ctx.query;
+	const userId = ctx.state.id;
+
+	const paginaAtual = Math.round(offset / cobrancasPorPagina + 1);
+
+	const chargesArray = await chargeQueries.getAllChargesbyUserId(userId);
+	const totalDePaginas = Math.round(chargesArray.length / cobrancasPorPagina);
+
+	const limitedAndOffsetedChargesArray = await chargeQueries.getLimitedAndOffsetedChargesList(
+		userId,
+		cobrancasPorPagina,
+		offset
+	);
+
+	const cobrancas = limitedAndOffsetedChargesArray.map((item) => {
+		const { duedate } = item;
+		const { paymentdate } = item;
+		const today = Date.now();
+
+		const chargeStatus = functionToCheckChargeStatus.checkChargeStatus(
+			duedate,
+			paymentdate,
+			today
+		);
+
+		const cobranca = {
+			idDoCliente: item.clientid,
+			descricao: item.description,
+			valor: item.amount,
+			vencimento: item.duedate,
+			linkDoBoleto: item.banksliplink,
+			status: chargeStatus,
+		};
+
+		return cobranca;
+	});
+
+	return response(ctx, 200, {
+		paginaAtual,
+		totalDePaginas,
+		cobrancas,
+	});
+};
+
+module.exports = { createCharges, listCharges };
