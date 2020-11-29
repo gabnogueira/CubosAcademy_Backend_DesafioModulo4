@@ -2,6 +2,7 @@ const clientFunctionsQueries = require('../repositories/biblioteca');
 const formatter = require('../utils/formatter');
 const response = require('../utils/response');
 
+// eslint-disable-next-line consistent-return
 const addNewClient = async (ctx) => {
 	const newClientData = ctx.request.body;
 	const formattedCpf = formatter.cpfFormatter(newClientData.cpf);
@@ -28,6 +29,7 @@ const addNewClient = async (ctx) => {
 	}
 };
 
+// eslint-disable-next-line consistent-return
 const updateClientData = async (ctx) => {
 	const clientDataToBeUpdated = ctx.request.body;
 	const formattedCpf = formatter.cpfFormatter(clientDataToBeUpdated.cpf);
