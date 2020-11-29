@@ -1,18 +1,18 @@
-const databasePrincipal = require('../utils/database');
+const mainDatabase = require('../utils/database');
 const schema = require('../utils/schema');
 
 /** query para criar tabela */
 const criarTabelas = (num) => {
 	const query = schema.schemasToCreateTables[num];
 
-	return databasePrincipal.query(query);
+	return mainDatabase.query(query);
 };
 
 /** queries de Usuarios */
 const obterUsuariosPorEmail = async (email) => {
 	const query = `SELECT * FROM users WHERE email = '${email}';`;
 
-	const result = await databasePrincipal.query(query);
+	const result = await mainDatabase.query(query);
 
 	return result.rows.shift();
 };
@@ -23,7 +23,7 @@ const adicionarUsuario = async (email, senha, nome) => {
 		values: [email, senha, nome],
 	};
 
-	return databasePrincipal.query(query);
+	return mainDatabase.query(query);
 };
 
 /** queries para funções de clientes */
@@ -40,7 +40,7 @@ const queryToAddNewClient = async (name, cpf, email, tel, userId) => {
 		values: [name, cpf, email, tel, userId],
 	};
 
-	return databasePrincipal.query(query);
+	return mainDatabase.query(query);
 };
 
 const queryToUpdateClientData = async (clientId, name, cpf, email, tel) => {
@@ -49,7 +49,7 @@ const queryToUpdateClientData = async (clientId, name, cpf, email, tel) => {
 		values: [name, cpf, email, tel, clientId],
 	};
 
-	const result = await databasePrincipal.query(query);
+	const result = await mainDatabase.query(query);
 
 	return result.rows.shift();
 };
@@ -60,7 +60,7 @@ const queryToGetClientById = async (clientId, userId) => {
 		values: [clientId, userId],
 	};
 
-	const result = await databasePrincipal.query(query);
+	const result = await mainDatabase.query(query);
 
 	return result.rows.shift();
 };
@@ -91,10 +91,36 @@ const queryToCreateNewCharge = async (
 		],
 	};
 
-	const result = await databasePrincipal.query(query);
+	const result = await mainDatabase.query(query);
 
 	return result.rows.shift();
 };
+
+const getAllChargesbyUserId = async (userId) => {
+	const query = {
+		text: `SELECT * FROM charges WHERE userid = $1;`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
+const getLimitedAndOffsetedChargesList = async (userId, limit, offset) => {
+	const query = {
+		text: `SELECT * FROM charges WHERE userid = $1 LIMIT $2 OFFSET $3;`,
+		values: [userId, limit, offset],
+	};
+
+	const result = await mainDatabase.query(query);
+	console.log(result.rows);
+	console.log(result.rows.length);
+
+	return result.rows;
+};
+
+// getLimitedAndOffsetedChargesList(1, 10, 0);
 
 module.exports = {
 	obterUsuariosPorEmail,
@@ -105,4 +131,6 @@ module.exports = {
 	queryToUpdateClientData,
 	queryToCreateNewCharge,
 	queryToGetClientById,
+	getAllChargesbyUserId,
+	getLimitedAndOffsetedChargesList,
 };
