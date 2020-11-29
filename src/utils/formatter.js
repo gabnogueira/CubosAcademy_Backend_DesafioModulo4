@@ -4,4 +4,10 @@ const cpfFormatter = (cpf) => {
 	return formattedCpf;
 };
 
-module.exports = { cpfFormatter };
+const dateFormatter = (date) => {
+	const formattedDate = date.split('/').reverse().join('-');
+
+	return formattedDate;
+};
+
+module.exports = { cpfFormatter, dateFormatter };
