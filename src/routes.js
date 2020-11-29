@@ -26,5 +26,6 @@ router.post(
 	verifyUser.verificacao,
 	chargeFunctions.createCharges
 );
+router.get('/cobrancas', verifyUser.verificacao, chargeFunctions.listCharges);
 
 module.exports = router;
