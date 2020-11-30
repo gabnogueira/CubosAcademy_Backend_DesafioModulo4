@@ -27,5 +27,6 @@ router.post(
 	chargeFunctions.createCharges
 );
 router.get('/cobrancas', verifyUser.verificacao, chargeFunctions.listCharges);
+router.put('/cobrancas', verifyUser.verificacao, chargeFunctions.payCharge);
 
 module.exports = router;
