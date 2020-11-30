@@ -109,4 +109,25 @@ const listCharges = async (ctx) => {
 	});
 };
 
-module.exports = { createCharges, listCharges };
+const payCharge = async (ctx) => {
+	const chargeId = ctx.request.body;
+	const userId = ctx.state.id;
+	const paymentDate = new Date().toISOString().substr(0, 10);
+
+	const payChargeById = await chargeQueries.payChargeById(
+		userId,
+		chargeId.idDaCobranca,
+		paymentDate
+	);
+
+	if (chargeId && payChargeById) {
+		return response(ctx, 200, {
+			mensagem: 'Cobrança paga com sucesso.',
+		});
+	}
+	return response(ctx, 400, {
+		mensagem: 'Erro no pagamento. Confira os dados da cobrança.',
+	});
+};
+
+module.exports = { createCharges, listCharges, payCharge };
