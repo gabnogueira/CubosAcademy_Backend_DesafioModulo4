@@ -120,7 +120,16 @@ const getLimitedAndOffsetedChargesList = async (userId, limit, offset) => {
 	return result.rows;
 };
 
-// getLimitedAndOffsetedChargesList(1, 10, 0);
+const payChargeById = async (userId, chargeId, paymentDate) => {
+	const query = {
+		text: `UPDATE charges SET paymentdate = $3 WHERE userid = $1 AND id = $2 RETURNING *;`,
+		values: [userId, chargeId, paymentDate],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows.shift();
+};
 
 module.exports = {
 	obterUsuariosPorEmail,
@@ -133,4 +142,5 @@ module.exports = {
 	queryToGetClientById,
 	getAllChargesbyUserId,
 	getLimitedAndOffsetedChargesList,
+	payChargeById,
 };
