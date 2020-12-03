@@ -11,4 +11,17 @@ const checkChargeStatus = (dueDate, paymentDate, today) => {
 	}
 };
 
-module.exports = { checkChargeStatus };
+// eslint-disable-next-line consistent-return
+const checkIfChargeIsOverdue = (dueDate, paymentDate, today) => {
+	if (!paymentDate && today > dueDate) {
+		return true;
+	}
+	if (!paymentDate && today < dueDate) {
+		return false;
+	}
+	if (paymentDate) {
+		return false;
+	}
+};
+
+module.exports = { checkChargeStatus, checkIfChargeIsOverdue };
