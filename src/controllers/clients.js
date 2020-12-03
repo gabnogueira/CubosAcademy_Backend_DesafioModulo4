@@ -1,5 +1,6 @@
 const clientFunctionsQueries = require('../repositories/biblioteca');
 const formatter = require('../utils/formatter');
+const typeOfSearch = require('../utils/typeOfSearch');
 const response = require('../utils/response');
 
 // eslint-disable-next-line consistent-return
@@ -66,4 +67,169 @@ const updateClientData = async (ctx) => {
 	}
 };
 
-module.exports = { addNewClient, updateClientData };
+// eslint-disable-next-line consistent-return
+const listOrSearchClients = async (ctx) => {
+	const { offset } = ctx.query;
+	const { clientesPorPagina } = ctx.query;
+	const { busca } = ctx.query;
+	const userId = ctx.state.id;
+
+	const paginaAtual = Math.round(offset / clientesPorPagina + 1);
+
+	// console.log(offset);
+	// console.log(clientesPorPagina);
+	// console.log(busca);
+
+	if (busca) {
+		const inputType = typeOfSearch.typeOfInput(busca);
+		/** aqui vem a query pra buscar os clientes utiizando o tipo de input como criterio de busca */
+		const limitedAndOffsetedClientsArrayWithSearch = clientFunctionsQueries.queryToGetClientsByUserIdAndSearchCriteria(
+			userId,
+			inputType,
+			busca,
+			clientesPorPagina,
+			offset
+		);
+
+		const totalDePaginas = Math.round(
+			limitedAndOffsetedClientsArrayWithSearch.length / clientesPorPagina
+		);
+
+		const issuedCharges = await clientFunctionsQueries.getTotalAmountOfIssuedChargesByClient(
+			userId
+		);
+
+		const paidCharges = await clientFunctionsQueries.getTotalAmountOfPaidChargesByClient(
+			userId
+		);
+
+		const overdueCharges = await clientFunctionsQueries.getTotalAmountOfOverdueChargesByClient(
+			userId
+		);
+
+		const clients = (await limitedAndOffsetedClientsArrayWithSearch).map(
+			(item) => {
+				const { name } = item;
+				const { email } = item;
+
+				let cobrancasFeitas = 0;
+				let cobrancasRecebidas = 0;
+				let estaInadimplente = false;
+
+				issuedCharges.filter((client) => {
+					if (client && client.name === name) {
+						cobrancasFeitas = client.cobrancasfeitas;
+						return cobrancasFeitas;
+					}
+					return cobrancasFeitas;
+				});
+
+				paidCharges.filter((client) => {
+					if (client && client.name === name) {
+						cobrancasRecebidas = client.cobrancasrecebidas;
+						return cobrancasRecebidas;
+					}
+					return cobrancasRecebidas;
+				});
+
+				overdueCharges.filter((client) => {
+					if (client && client.name === name) {
+						estaInadimplente = true;
+						return estaInadimplente;
+					}
+					return estaInadimplente;
+				});
+
+				const cliente = {
+					nome: name,
+					email,
+					cobrancasFeitas,
+					cobrancasRecebidas,
+					estaInadimplente,
+				};
+
+				return cliente;
+			}
+		);
+
+		return response(ctx, 200, {
+			paginaAtual,
+			totalDePaginas,
+			clientes: clients,
+		});
+	}
+	if (!busca) {
+		/** query para trazer todos os clientes do usuario, apenas limitando a paginação */
+		const limitedAndOffsetedClientsArray = await clientFunctionsQueries.queryToGetAllClientsByUserId(
+			userId,
+			clientesPorPagina,
+			offset
+		);
+		const totalDePaginas = Math.round(
+			limitedAndOffsetedClientsArray.length / clientesPorPagina
+		);
+
+		const issuedCharges = await clientFunctionsQueries.getTotalAmountOfIssuedChargesByClient(
+			userId
+		);
+
+		const paidCharges = await clientFunctionsQueries.getTotalAmountOfPaidChargesByClient(
+			userId
+		);
+
+		const overdueCharges = await clientFunctionsQueries.getTotalAmountOfOverdueChargesByClient(
+			userId
+		);
+
+		const clients = limitedAndOffsetedClientsArray.map((item) => {
+			const { name } = item;
+			const { email } = item;
+
+			let cobrancasFeitas = 0;
+			let cobrancasRecebidas = 0;
+			let estaInadimplente = false;
+
+			issuedCharges.filter((client) => {
+				if (client && client.name === name) {
+					cobrancasFeitas = client.cobrancasfeitas;
+					return cobrancasFeitas;
+				}
+				return cobrancasFeitas;
+			});
+
+			paidCharges.filter((client) => {
+				if (client && client.name === name) {
+					cobrancasRecebidas = client.cobrancasrecebidas;
+					return cobrancasRecebidas;
+				}
+				return cobrancasRecebidas;
+			});
+
+			overdueCharges.filter((client) => {
+				if (client && client.name === name) {
+					estaInadimplente = true;
+					return estaInadimplente;
+				}
+				return estaInadimplente;
+			});
+
+			const cliente = {
+				nome: name,
+				email,
+				cobrancasFeitas,
+				cobrancasRecebidas,
+				estaInadimplente,
+			};
+
+			return cliente;
+		});
+
+		return response(ctx, 200, {
+			paginaAtual,
+			totalDePaginas,
+			clientes: clients,
+		});
+	}
+};
+
+module.exports = { addNewClient, updateClientData, listOrSearchClients };
