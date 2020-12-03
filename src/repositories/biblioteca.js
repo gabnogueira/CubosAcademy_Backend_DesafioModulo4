@@ -65,6 +65,113 @@ const queryToGetClientById = async (clientId, userId) => {
 	return result.rows.shift();
 };
 
+const queryToGetAllClientsByUserId = async (userId, limit, offset) => {
+	const query = {
+		text: `SELECT * FROM clients WHERE userid = $1 LIMIT $2 OFFSET $3`,
+		values: [userId, limit, offset],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
+const queryToGetClientsByUserIdAndSearchCriteria = async (
+	userId,
+	type,
+	criteria,
+	limit,
+	offset
+) => {
+	const query = {
+		text: `SELECT * FROM clients WHERE userid = $1 and ${type} LIKE '%${criteria}%' LIMIT $2 OFFSET $3;`,
+		values: [userId, limit, offset],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
+const getTotalAmountOfIssuedChargesByClient = async (userId) => {
+	const query = {
+		text: `select * from (
+			select clientid, sum(amount) as cobrancasFeitas  from (
+				select * from (
+					select * from clients
+					where userid = $1) as clients
+				join
+					(select * from charges
+					where userid = $1) as charges
+				on clients.id = charges.clientid) as clientsByCharges
+			group by clientid
+			) as cobrancasFeirasPorId
+		join
+			(select * from clients
+			where userid = $1) as clients
+		on clientid = clients.id`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
+const getTotalAmountOfPaidChargesByClient = async (userId) => {
+	const query = {
+		text: `select * from (
+			select clientid, sum(amount) as cobrancasRecebidas  from (
+				select *from (
+					select * from clients
+					where userid = $1) as clients
+				join
+					(select * from charges
+					where userid = $1)as charges
+				on clients.id = charges.clientid) as clientsByCharges
+			where paymentdate notnull
+			group by clientid
+			) as cobrancasRecebidasPorId
+		join
+			(select * from clients
+			where userid = $1) as clients
+		on clientid = clients.id`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
+const getTotalAmountOfOverdueChargesByClient = async (userId) => {
+	const query = {
+		text: `select * from (
+			select clientid , sum(amount) as cobrancasVencidas  from (
+				select *from (
+					select * from clients
+					where userid = $1) as clients
+				join
+					(select * from charges
+					where userid = $1)as charges
+				on clients.id = charges.clientid) as clientsByCharges
+			where 
+				paymentdate is null
+				and duedate < now() 
+			group by clientid
+		) as cobrancasVencidasPorId
+		join
+			(select * from clients
+			where userid = $1) as clients
+		on clientid = clients.id`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows;
+};
+
 /** queries para funções de cobranças */
 
 const queryToCreateNewCharge = async (
@@ -114,8 +221,6 @@ const getLimitedAndOffsetedChargesList = async (userId, limit, offset) => {
 	};
 
 	const result = await mainDatabase.query(query);
-	console.log(result.rows);
-	console.log(result.rows.length);
 
 	return result.rows;
 };
@@ -143,4 +248,9 @@ module.exports = {
 	getAllChargesbyUserId,
 	getLimitedAndOffsetedChargesList,
 	payChargeById,
+	queryToGetAllClientsByUserId,
+	getTotalAmountOfIssuedChargesByClient,
+	getTotalAmountOfPaidChargesByClient,
+	getTotalAmountOfOverdueChargesByClient,
+	queryToGetClientsByUserIdAndSearchCriteria,
 };
