@@ -1,20 +1,30 @@
-const clientFunctionsQueries = require('../repositories/biblioteca');
+const clientFunctionsQueries = require('../repositories/libraryClients');
 const formatter = require('../utils/formatter');
 const typeOfSearch = require('../utils/typeOfSearch');
+const inputValidation = require('../utils/inputValidation');
 const response = require('../utils/response');
 
 // eslint-disable-next-line consistent-return
 const addNewClient = async (ctx) => {
 	const newClientInfo = ctx.request.body;
 	const formattedCpf = formatter.cpfFormatter(newClientInfo.cpf);
+	const userId = ctx.state.id;
 
-	const checkIfClientExists = await clientFunctionsQueries.checkIfClientAlreadyExists(
-		formattedCpf
+	const getCpf = await clientFunctionsQueries.checkIfClientAlreadyExists(
+		formattedCpf,
+		userId
 	);
 
-	if (newClientInfo && !checkIfClientExists) {
-		const userId = ctx.state.id;
+	// eslint-disable-next-line no-unneeded-ternary
+	const checkIfClientExists = getCpf ? true : false;
 
+	const validCpf = inputValidation.validateCpf(newClientInfo.cpf);
+
+	if (!validCpf) {
+		return response(ctx, 400, { message: 'CPF inválido ' });
+	}
+
+	if (newClientInfo && !checkIfClientExists) {
 		const addClientQueryResult = await clientFunctionsQueries.queryToAddNewClient(
 			newClientInfo.nome,
 			formattedCpf,
@@ -33,24 +43,32 @@ const addNewClient = async (ctx) => {
 // eslint-disable-next-line consistent-return
 const updateClientData = async (ctx) => {
 	const clientDataToBeUpdated = ctx.request.body;
+	const userId = ctx.state.id;
 	const formattedCpf = formatter.cpfFormatter(clientDataToBeUpdated.cpf);
 
-	const checkIfClientExists = await clientFunctionsQueries.checkIfClientAlreadyExists(
-		formattedCpf
-	);
+	// const getCpf = await clientFunctionsQueries.checkIfClientAlreadyExists(
+	// formattedCpf,
+	// userId
+	// );
 
-	console.log(checkIfClientExists);
+	// eslint-disable-next-line no-unneeded-ternary
+	// const checkIfClientExists = getCpf ? true : false;
 
-	if (clientDataToBeUpdated && !checkIfClientExists) {
+	const validCpf = inputValidation.validateCpf(clientDataToBeUpdated.cpf);
+
+	if (!validCpf) {
+		return response(ctx, 400, { message: 'CPF inválido' });
+	}
+
+	if (clientDataToBeUpdated) {
 		const updateClientDataQueryResult = await clientFunctionsQueries.queryToUpdateClientData(
 			clientDataToBeUpdated.id,
 			clientDataToBeUpdated.nome,
 			formattedCpf,
 			clientDataToBeUpdated.email,
-			clientDataToBeUpdated.tel
+			clientDataToBeUpdated.tel,
+			userId
 		);
-
-		console.log(updateClientDataQueryResult);
 
 		return response(ctx, 200, {
 			dados: {
@@ -62,8 +80,8 @@ const updateClientData = async (ctx) => {
 			},
 		});
 	}
-	if (clientDataToBeUpdated && checkIfClientExists) {
-		return response(ctx, 404, 'Esse CPF já foi usado em outro cadastro.');
+	if (!clientDataToBeUpdated) {
+		return response(ctx, 400, 'Erro. Reveja os dados a serem atualizados.');
 	}
 };
 
@@ -160,7 +178,7 @@ const listOrSearchClients = async (ctx) => {
 	}
 	if (!busca) {
 		/** query para trazer todos os clientes do usuario, apenas limitando a paginação */
-		const limitedAndOffsetedClientsArray = await clientFunctionsQueries.queryToGetAllClientsByUserId(
+		const limitedAndOffsetedClientsArray = await clientFunctionsQueries.queryToGetAllClientsByUserIdWithLimitAndOffset(
 			userId,
 			clientesPorPagina,
 			offset
