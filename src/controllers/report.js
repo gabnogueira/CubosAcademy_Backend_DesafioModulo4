@@ -12,7 +12,15 @@ const getReport = async (ctx) => {
 		userId
 	);
 
-	const arrayOfChargesByStatus = await reportQueries.queryToGetTotalNumberOfChargesPerStatus(
+	const totalNumberOfOverdueCharges = await reportQueries.queryToGetTotalNumberOfOverdueCharges(
+		userId
+	);
+
+	const totalNumberOfPaidCharges = await reportQueries.queryToGetTotalNumberOfPaidCharges(
+		userId
+	);
+
+	const totalNumberOfAwaitingPaymentCharges = await reportQueries.queryToGetTotalNumberOfAwaitingPaymentCharges(
 		userId
 	);
 
@@ -25,12 +33,20 @@ const getReport = async (ctx) => {
 		totalNumberOfClients.length - qtdClientsInadimplentes;
 
 	const totalNumberOfChargesByStatus = {
-		qtdCobrancasPrevistas: arrayOfChargesByStatus.cobrancasprevistas,
-		qtdCobrancasPagas: arrayOfChargesByStatus.cobrancaspagas,
-		qtdCobrancasVencidas: arrayOfChargesByStatus.cobrancasvencidas,
+		qtdCobrancasPrevistas: !totalNumberOfAwaitingPaymentCharges
+			? 0
+			: Number(totalNumberOfAwaitingPaymentCharges.cobrancasprevistas),
+		qtdCobrancasPagas: !totalNumberOfPaidCharges
+			? 0
+			: Number(totalNumberOfPaidCharges.cobrancaspagas),
+		qtdCobrancasVencidas: !totalNumberOfOverdueCharges
+			? 0
+			: Number(totalNumberOfOverdueCharges.cobrancasvencidas),
 	};
 
-	const saldoEmConta = getCurrentBalance.saldoemconta;
+	const saldoEmConta = !getCurrentBalance
+		? 0
+		: Number(getCurrentBalance.saldoemconta);
 
 	const report = {
 		qtdClientesAdimplentes,
