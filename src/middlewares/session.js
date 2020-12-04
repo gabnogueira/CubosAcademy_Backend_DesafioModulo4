@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const response = require('../utils/response');
 require('dotenv').config();
 
-const verificacao = async (ctx, next) => {
+const verifyUser = async (ctx, next) => {
 	const [bearer, token] = ctx.headers.authorization.split(' ');
 
 	try {
@@ -18,4 +18,4 @@ const verificacao = async (ctx, next) => {
 	return next();
 };
 
-module.exports = { verificacao };
+module.exports = { verifyUser };
