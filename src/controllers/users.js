@@ -1,15 +1,25 @@
-const queriesParaFuncoesDeUsuarios = require('../repositories/biblioteca');
-const encriptarSenha = require('../utils/passwords');
+const userFunctionsQueries = require('../repositories/libraryUsers');
+const encryptPassword = require('../utils/passwords');
 const response = require('../utils/response');
 
+// eslint-disable-next-line consistent-return
 const addNewUser = async (ctx) => {
 	const inputs = ctx.request.body;
 
-	console.log(inputs);
-	if (inputs) {
-		const hash = await encriptarSenha.encrypt(inputs.senha);
+	const getEmailAndName = await userFunctionsQueries.checkIfUserAlreadyExists(
+		inputs.email,
+		inputs.nome
+	);
 
-		const result = await queriesParaFuncoesDeUsuarios.adicionarUsuario(
+	// eslint-disable-next-line no-unneeded-ternary
+	const checkIfUserExists = getEmailAndName ? true : false;
+
+	console.log(checkIfUserExists);
+
+	if (inputs && !checkIfUserExists) {
+		const hash = await encryptPassword.encrypt(inputs.senha);
+
+		const result = await userFunctionsQueries.addNewUser(
 			inputs.email,
 			hash,
 			inputs.nome
@@ -17,7 +27,11 @@ const addNewUser = async (ctx) => {
 
 		return response(ctx, 200, { id: result.rows.shift().id });
 	}
-	return response(ctx, 200, 'Sucesso!');
+	if (inputs && checkIfUserExists) {
+		return response(ctx, 400, {
+			message: 'Email ou nome de usuário já está cadastrado.',
+		});
+	}
 };
 
 module.exports = { addNewUser };
