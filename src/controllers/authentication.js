@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
 const jwt = require('jsonwebtoken');
-const database = require('../repositories/biblioteca');
+const userQueries = require('../repositories/libraryUsers');
 const response = require('../utils/response');
 const passwords = require('../utils/passwords');
 
@@ -13,7 +13,7 @@ const authUser = async (ctx) => {
 		return response(ctx, 400, { message: 'Pedido mal formatado' });
 	}
 
-	const result = await database.obterUsuariosPorEmail(email);
+	const result = await userQueries.getUserByEmail(email);
 
 	if (result) {
 		const comparacao = await passwords.check(senha, result.senha);
