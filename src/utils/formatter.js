@@ -1,6 +1,7 @@
 const cpfFormatter = (cpf) => {
 	const formattedCpf = cpf.replace('.', '').replace('.', '').replace('-', '');
 
+	// console.log(formattedCpf);
 	return formattedCpf;
 };
 
