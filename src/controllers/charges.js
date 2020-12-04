@@ -1,18 +1,34 @@
 const pagarme = require('../utils/pagarme');
-const chargeQueries = require('../repositories/biblioteca');
+const chargeQueries = require('../repositories/libraryCharges');
+const clientQueries = require('../repositories/libraryClients');
 const formatter = require('../utils/formatter');
 const functionToCheckChargeStatus = require('../utils/chargeStatus');
+const inputValidation = require('../utils/inputValidation');
 const response = require('../utils/response');
 
 const createCharges = async (ctx) => {
 	const newChargeInfo = ctx.request.body;
 	const userId = ctx.state.id;
-	const clientData = await chargeQueries.queryToGetClientById(
+	const clientData = await clientQueries.queryToGetClientById(
 		newChargeInfo.idDoCliente,
 		userId
 	);
 
 	const formattedDueDate = formatter.dateFormatter(newChargeInfo.vencimento);
+
+	const validAmount = inputValidation.validateAmount(newChargeInfo.valor);
+	const validDate = inputValidation.validateDate(formattedDueDate);
+
+	if (!validAmount) {
+		return response(ctx, 400, { message: 'Valor inválido' });
+	}
+
+	if (!validDate) {
+		return response(ctx, 400, {
+			message:
+				'Data de vencimento inválida. Não é possível criar uma cobrança com vencimento em uma data passada.',
+		});
+	}
 
 	const pagarmeData = await pagarme.createChargesAtPagarme(
 		newChargeInfo.valor,
@@ -36,8 +52,6 @@ const createCharges = async (ctx) => {
 			pagarmeData.tid
 		);
 
-		// console.log(newCharge);
-
 		const { duedate } = newCharge;
 		const { paymentdate } = newCharge;
 		const today = Date.now();
@@ -56,7 +70,6 @@ const createCharges = async (ctx) => {
 			linkDoBoleto: newCharge.banksliplink,
 			status: chargeStatus,
 		};
-		console.log(cobranca);
 
 		return response(ctx, 201, { cobranca });
 	}
