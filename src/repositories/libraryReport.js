@@ -1,5 +1,4 @@
 const mainDatabase = require('../utils/database');
-// const schema = require('../utils/schema');
 
 const queryToGetTotalNumberOfChargesPerStatus = async (userId) => {
 	const query = {
@@ -33,6 +32,59 @@ const queryToGetTotalNumberOfChargesPerStatus = async (userId) => {
 
 	const result = await mainDatabase.query(query);
 
+	console.log(result.rows.shift());
+
+	return result.rows.shift();
+};
+
+const queryToGetTotalNumberOfOverdueCharges = async (userId) => {
+	const query = {
+		text: `select userid, count(id) as cobrancasVencidas from charges
+		where
+			userid = $1
+			and paymentdate is null
+			and duedate < now()
+		group by userid; `,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	// console.log(result.rows.shift());
+
+	return result.rows.shift();
+};
+
+const queryToGetTotalNumberOfPaidCharges = async (userId) => {
+	const query = {
+		text: `select userid, count(id) as cobrancasPagas from charges
+		where
+			userid = $1
+			and paymentdate notnull
+		group by userid`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	return result.rows.shift();
+};
+
+const queryToGetTotalNumberOfAwaitingPaymentCharges = async (userId) => {
+	const query = {
+		text: `select userid, count(id) as cobrancasPrevistas from charges
+		where
+			userid = $1
+			and paymentdate is null
+			and duedate >= now()
+		group by userid`,
+		values: [userId],
+	};
+
+	const result = await mainDatabase.query(query);
+
+	// console.log(result.rows.shift());
+
 	return result.rows.shift();
 };
 
@@ -49,15 +101,13 @@ const queryToGetCurrentBalance = async (userId) => {
 
 	const result = await mainDatabase.query(query);
 
-	// console.log(result.rows.shift());
-
 	return result.rows.shift();
 };
 
 module.exports = {
 	queryToGetTotalNumberOfChargesPerStatus,
 	queryToGetCurrentBalance,
+	queryToGetTotalNumberOfAwaitingPaymentCharges,
+	queryToGetTotalNumberOfOverdueCharges,
+	queryToGetTotalNumberOfPaidCharges,
 };
-
-// queryToGetTotalNumberOfChargesPerStatus(1);
-// queryToGetCurrentBalance(1);
