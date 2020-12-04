@@ -46,14 +46,6 @@ const updateClientData = async (ctx) => {
 	const userId = ctx.state.id;
 	const formattedCpf = formatter.cpfFormatter(clientDataToBeUpdated.cpf);
 
-	// const getCpf = await clientFunctionsQueries.checkIfClientAlreadyExists(
-	// formattedCpf,
-	// userId
-	// );
-
-	// eslint-disable-next-line no-unneeded-ternary
-	// const checkIfClientExists = getCpf ? true : false;
-
 	const validCpf = inputValidation.validateCpf(clientDataToBeUpdated.cpf);
 
 	if (!validCpf) {
@@ -94,14 +86,10 @@ const listOrSearchClients = async (ctx) => {
 
 	const paginaAtual = Math.round(offset / clientesPorPagina + 1);
 
-	// console.log(offset);
-	// console.log(clientesPorPagina);
-	// console.log(busca);
-
 	if (busca) {
 		const inputType = typeOfSearch.typeOfInput(busca);
 		/** aqui vem a query pra buscar os clientes utiizando o tipo de input como criterio de busca */
-		const limitedAndOffsetedClientsArrayWithSearch = clientFunctionsQueries.queryToGetClientsByUserIdAndSearchCriteria(
+		const limitedAndOffsetedClientsArrayWithSearch = await clientFunctionsQueries.queryToGetClientsByUserIdAndSearchCriteria(
 			userId,
 			inputType,
 			busca,
@@ -109,9 +97,12 @@ const listOrSearchClients = async (ctx) => {
 			offset
 		);
 
-		const totalDePaginas = Math.round(
-			limitedAndOffsetedClientsArrayWithSearch.length / clientesPorPagina
-		);
+		const numberOfClients = limitedAndOffsetedClientsArrayWithSearch.length;
+
+		const totalDePaginas =
+			Number(offset) === 0
+				? 1
+				: Math.round(numberOfClients / Number(clientesPorPagina));
 
 		const issuedCharges = await clientFunctionsQueries.getTotalAmountOfIssuedChargesByClient(
 			userId
@@ -183,9 +174,13 @@ const listOrSearchClients = async (ctx) => {
 			clientesPorPagina,
 			offset
 		);
-		const totalDePaginas = Math.round(
-			limitedAndOffsetedClientsArray.length / clientesPorPagina
-		);
+
+		const numberOfClients = limitedAndOffsetedClientsArray.length;
+
+		const totalDePaginas =
+			Number(offset) === 0
+				? 1
+				: Math.round(numberOfClients / Number(clientesPorPagina));
 
 		const issuedCharges = await clientFunctionsQueries.getTotalAmountOfIssuedChargesByClient(
 			userId
