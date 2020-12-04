@@ -84,7 +84,12 @@ const listCharges = async (ctx) => {
 	const paginaAtual = Math.round(offset / cobrancasPorPagina + 1);
 
 	const chargesArray = await chargeQueries.getAllChargesbyUserId(userId);
-	const totalDePaginas = Math.round(chargesArray.length / cobrancasPorPagina);
+
+	const numberOfCharges = chargesArray.length;
+	const totalDePaginas =
+		Number(offset) === 0
+			? 1
+			: Math.round(numberOfCharges / Number(cobrancasPorPagina));
 
 	const limitedAndOffsetedChargesArray = await chargeQueries.getLimitedAndOffsetedChargesList(
 		userId,
