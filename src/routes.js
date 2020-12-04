@@ -4,7 +4,7 @@ const userFunctions = require('./controllers/users');
 const verifyFunction = require('./middlewares/session');
 const clientFunctions = require('./controllers/clients');
 const chargeFunctions = require('./controllers/charges');
-// const { verificacao } = require('./middlewares/session');
+const reportFunction = require('./controllers/report');
 
 const router = new Router();
 
@@ -15,32 +15,35 @@ router.post('/usuarios', userFunctions.addNewUser);
 //* * Endpoints de clientes */
 router.post(
 	'/clientes',
-	verifyFunction.verificacao,
+	verifyFunction.verifyUser,
 	clientFunctions.addNewClient
 );
 router.put(
 	'/clientes',
-	verifyFunction.verificacao,
+	verifyFunction.verifyUser,
 	clientFunctions.updateClientData
 );
 
 router.get(
 	'/clientes',
-	verifyFunction.verificacao,
+	verifyFunction.verifyUser,
 	clientFunctions.listOrSearchClients
 );
 
 //* * Endpoints de cobranças */
 router.post(
 	'/cobrancas',
-	verifyFunction.verificacao,
+	verifyFunction.verifyUser,
 	chargeFunctions.createCharges
 );
 router.get(
 	'/cobrancas',
-	verifyFunction.verificacao,
+	verifyFunction.verifyUser,
 	chargeFunctions.listCharges
 );
-router.put('/cobrancas', verifyFunction.verificacao, chargeFunctions.payCharge);
+router.put('/cobrancas', verifyFunction.verifyUser, chargeFunctions.payCharge);
+
+//* * Endpoint do relatório */
+router.get('/relatorios', verifyFunction.verifyUser, reportFunction.getReport);
 
 module.exports = router;
